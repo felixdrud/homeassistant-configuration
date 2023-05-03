@@ -1,0 +1,43 @@
+blueprint:
+  name: Toggle light with scene
+  description: >-
+    A script which toggles the light off or on using the selected scene.
+    Normal light.toggle service only toggles between off and last on state.
+  domain: script
+  source_url: https://github.com/felixdrud/homeassistant-configuration/blob/main/blueprints/script/toggle_light_with_scene.yaml
+  author: Felix Drud
+  input:
+    light_entity:
+      name: Light entity
+      description: Select the light (or light group). The select entity's state will be used to decide if the script should turn it on or off. This entity turned off, if it is currently on.
+      selector:
+        entity:
+          multiple: false
+          filter:
+            domain: light
+    scene_entity:
+      name: Scene entity
+      description: Select the scene to use when toggling the light 'on'. Make sure that the scene contains the same light (group) as selected in the Light Entity above.
+      selector:
+        entity:
+          multiple: false
+          filter:
+            domain: scene
+
+mode: restart
+
+sequence:
+  - if:
+      - condition: state
+        state: "on"
+        entity_id: !input light_entity
+    then:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: !input light_entity
+    else:
+      - service: scene.turn_on
+        target:
+          entity_id: !input scene_entity
+        metadata: {}
